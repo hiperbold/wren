@@ -1,0 +1,15 @@
+[package]
+name = "wren-bench"
+description = "Transcription benchmark against the golden set (dev tool — not distributed)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+wren-core = { path = "../wren-core" }
+wren-adapters = { path = "../wren-adapters" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+# Same version as wren-adapters — reading the golden set WAVs.
+hound = "3.5.1"

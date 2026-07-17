@@ -1,0 +1,21 @@
+{
+  "header.title": "History",
+  "header.description": "Your latest dictations, with status and metrics. Hover over an item to copy or resend it.",
+  "search.placeholder": "Search the dictated text or the provider…",
+  "search.noResults": "No results for “{{query}}”.",
+  "loading": "Loading…",
+  "empty.title": "No dictations yet",
+  "empty.description": "Use the global shortcut and your dictations will appear here.",
+  "day.today": "Today",
+  "day.yesterday": "Yesterday",
+  "meta.trimmed": "{{recorded}}s dictated → {{sent}}s sent",
+  "meta.audio": "audio {{secs}}s",
+  "meta.latency": "response {{ms}}ms",
+  "card.retryTitle": "Transcribe again with the active provider",
+  "card.retrying": "Resending…",
+  "card.retry": "Resend",
+  "card.copyTitle": "Copy text",
+  "card.copied": "Copied",
+  "card.copy": "Copy",
+  "card.failed": "Transcription failed — audio preserved"
+}

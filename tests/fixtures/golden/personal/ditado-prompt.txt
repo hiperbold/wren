@@ -1,0 +1,1 @@
+Preciso que você refatore o módulo de configurações para separar a leitura da escrita. Depois disso, rode os testes e me mostre um resumo do que mudou. Se algum teste quebrar, não tente corrigir sozinho, só me avise.

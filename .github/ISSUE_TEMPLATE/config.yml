@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussions
+    url: https://github.com/rafaelvieiras/wren/discussions
+    about: Ask questions, share ideas, and discuss Wren here.
+  - name: Wren website
+    url: https://wren.rafaelvieiras.com
+    about: Learn more about Wren.

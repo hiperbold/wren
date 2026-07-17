@@ -1,0 +1,24 @@
+[package]
+name = "wren-adapters"
+description = "Concrete adapters for the wren-core ports: HTTP transcriber, audio (cpal), text injection, storage."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+wren-core = { path = "../wren-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+log = { version = "0.4", features = ["std"] }
+cpal = "0.18.1"
+hound = "3.5.1"
+arboard = "3.6.1"
+enigo = "0.6.1"
+dirs = "6.0.0"
+reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "multipart", "json", "rustls"] }
+rubato = "3.0.0"
+audioadapter-buffers = "3.0"
+flacenc = { version = "0.5.1", default-features = false }
+earshot = "1.1.0"
+rodio = { version = "0.22.2", default-features = false, features = ["playback"] }

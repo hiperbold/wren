@@ -1,0 +1,13 @@
+{
+  "title": "Atalhos",
+  "description": "Defina como iniciar, parar e cancelar um ditado. As mudanças são salvas automaticamente.",
+  "global.label": "Atalho global",
+  "global.hint": "Clique na caixa e pressione a combinação (modificadores + tecla).",
+  "activation.label": "Modo de ativação",
+  "activation.hint.toggle": "Aperte uma vez para iniciar e outra para parar.",
+  "activation.hint.pushToTalk": "Grava só enquanto o atalho estiver pressionado.",
+  "activation.option.toggle": "Alternar — aperta para iniciar, aperta para parar",
+  "activation.option.pushToTalk": "Segurar para falar — grava enquanto pressionado",
+  "cancel.label": "Atalho de cancelar",
+  "cancel.hint": "Descarta a gravação sem transcrever. Só fica ativo durante a gravação — fora dela a tecla continua livre para os outros apps."
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Audio",
+  "description": "Microphone, pause compression, and feedback sounds. Changes are saved automatically.",
+  "device.label": "Microphone",
+  "device.hint": "With “System default,” Wren follows the operating system's microphone. Your choice is kept even if the device is disconnected right now.",
+  "device.systemDefault": "System default",
+  "device.refresh": "Refresh microphone list",
+  "compression.label": "Shorten long pauses",
+  "compression.info": "Less audio billed and fewer hallucinations. Turn it off to send the audio exactly as recorded.",
+  "compression.hint": "Shortens long thinking pauses before sending.",
+  "compression.prefix": "Shorten pauses longer than",
+  "compression.secondsAriaLabel": "Seconds of pause before shortening",
+  "compression.secondsSuffix": "seconds",
+  "sounds.label": "Feedback sounds",
+  "sounds.hint": "Short tones on start, finish, and error.",
+  "infoHint.ariaLabel": "More information"
+}

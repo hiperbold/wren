@@ -1,0 +1,60 @@
+{
+  "samples": [
+    {
+      "id": "ruido-leitura",
+      "audio": "public/RuidoGravacaoPropria.wav",
+      "reference": "public/RuidoGravacaoPropria.txt",
+      "scenario": "reading with background noise, rich punctuation (26 s)",
+      "punctuation": "curated",
+      "source": "tech4humans/Audio-Transcription-Models-Comparison-PT-BR (Apache-2.0)"
+    },
+    {
+      "id": "grafos-cotidiano",
+      "audio": "public/grafos-homem.wav",
+      "reference": "public/grafos-homem.txt",
+      "scenario": "short everyday speech, simple sentences (8.5 s)",
+      "punctuation": "curated",
+      "source": "tech4humans/Audio-Transcription-Models-Comparison-PT-BR (Apache-2.0)"
+    },
+    {
+      "id": "sotaque-recife",
+      "audio": "public/NordestePEsotaque.wav",
+      "reference": "public/NordestePEsotaque.txt",
+      "scenario": "spontaneous speech, Recife accent, questions (12 s)",
+      "punctuation": "curated",
+      "source": "tech4humans/Audio-Transcription-Models-Comparison-PT-BR (Apache-2.0)"
+    },
+    {
+      "id": "cpf-numerico",
+      "audio": "public/cpf-agrupado.wav",
+      "reference": "public/cpf-agrupado.txt",
+      "scenario": "numeric entity dictated in groups (9 s)",
+      "punctuation": "none",
+      "source": "tech4humans/Audio-Transcription-Models-Comparison-PT-BR (Apache-2.0)"
+    },
+    {
+      "id": "ditado-prompt",
+      "audio": "personal/ditado-prompt.wav",
+      "reference": "personal/ditado-prompt.txt",
+      "scenario": "instruction for an AI with 3 thinking pauses (4/3/5 s; the 3 s one mid-clause) — script in personal/ditado-prompt.roteiro.md",
+      "punctuation": "exact",
+      "source": "own recording (project owner)"
+    },
+    {
+      "id": "ditado-mensagem",
+      "audio": "personal/ditado-mensagem.wav",
+      "reference": "personal/ditado-mensagem.txt",
+      "scenario": "informal message with question/exclamation and 3 pauses (3/4/3 s; the last one mid-clause) — script in personal/ditado-mensagem.roteiro.md",
+      "punctuation": "exact",
+      "source": "own recording (project owner)"
+    },
+    {
+      "id": "ditado-tecnico",
+      "audio": "personal/ditado-tecnico.wav",
+      "reference": "personal/ditado-tecnico.txt",
+      "scenario": "technical vocabulary (Wren, Tauri, Rust, wgpu, Groq) with 2 pauses (5/3 s; the 3 s one before an acronym) — script in personal/ditado-tecnico.roteiro.md",
+      "punctuation": "exact",
+      "source": "own recording (project owner)"
+    }
+  ]
+}

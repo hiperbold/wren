@@ -1,0 +1,13 @@
+{
+  "title": "Shortcuts",
+  "description": "Set how to start, stop, and cancel a dictation. Changes are saved automatically.",
+  "global.label": "Global shortcut",
+  "global.hint": "Click the box and press the combination (modifiers + key).",
+  "activation.label": "Activation mode",
+  "activation.hint.toggle": "Press once to start and again to stop.",
+  "activation.hint.pushToTalk": "Records only while the shortcut is held.",
+  "activation.option.toggle": "Toggle — press to start, press to stop",
+  "activation.option.pushToTalk": "Push to talk — records while held",
+  "cancel.label": "Cancel shortcut",
+  "cancel.hint": "Discards the recording without transcribing. Only active during recording — otherwise the key stays free for other apps."
+}

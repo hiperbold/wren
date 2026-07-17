@@ -1,0 +1,24 @@
+[package]
+name = "wren-embedded"
+description = "Embedded local transcription engine (Phase 2): disposable subprocess worker + model management. Feature-gated — only ships in the offline edition."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+wren-core = { path = "../wren-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+log = { version = "0.4" }
+dirs = "6.0.0"
+reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "json", "rustls"] }
+sha2 = "0.10"
+# Inference engine — only linked under the `inference` feature (offline edition).
+transcribe-rs = { version = "0.3.11", default-features = false, features = ["onnx"], optional = true }
+
+[features]
+default = []
+# Turns on the real inference engine (transcribe-rs/ONNX) in the worker. The
+# cloud edition does NOT enable this feature and does not pay the ONNX weight.
+inference = ["dep:transcribe-rs"]

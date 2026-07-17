@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Wren — design tokens (dark-only). Single source of truth for color/type/space.
+   Based on the UX audit §4.1. The identity is earthy/orange; the accent is
+   RESERVED for the primary action and active state (not for help text/links).
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #171513;
+  --surface: #201d19;
+  --surface-2: #2a2620;
+  --border-strong: #4a443c;
+
+  /* Semantic shadcn mapping (dark-only) */
+  --background: #171513;
+  --foreground: #f4ece4;
+  --card: #201d19;
+  --card-foreground: #f4ece4;
+  --popover: #221f1a;
+  --popover-foreground: #f4ece4;
+  --primary: #e07a3f;
+  --primary-hover: #f08a4f;
+  --primary-foreground: #1a1512;
+  --secondary: #2a2620;
+  --secondary-foreground: #f4ece4;
+  --muted: #2a2620;
+  --muted-foreground: #b8afa2; /* adjusted for AA over --bg */
+  --subtle-foreground: #8d8479; /* only for items >=16px / non-essential */
+  --accent: #2a2620; /* shadcn hover-surface — NOT the orange */
+  --accent-foreground: #f4ece4;
+  --destructive: #e0574f;
+  --destructive-foreground: #1a1512;
+  --border: #3a352f;
+  --input: #3a352f;
+  --ring: #ffb266;
+
+  /* Semantic statuses — SINGLE map used throughout the app */
+  --success: #5fbf7f;
+  --success-bg: rgba(95, 191, 127, 0.14);
+  --warning: #e0b23f;
+  --warning-bg: rgba(224, 178, 63, 0.14);
+  --danger: #e0574f;
+  --danger-bg: rgba(224, 87, 79, 0.14);
+  --info: #6fa8dc;
+  --info-bg: rgba(111, 168, 220, 0.14);
+
+  /* Pipeline stage colors (Telemetry) — stable across screens */
+  --stage-capture: #6b7bd6;
+  --stage-vad: #5fbf7f;
+  --stage-persist: #e0b23f;
+  --stage-transcribe: #e07a3f;
+  --stage-deliver: #a86cc9;
+
+  --radius: 0.625rem; /* 10px = card (md) */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+
+  --color-stage-capture: var(--stage-capture);
+  --color-stage-vad: var(--stage-vad);
+  --color-stage-persist: var(--stage-persist);
+  --color-stage-transcribe: var(--stage-transcribe);
+  --color-stage-deliver: var(--stage-deliver);
+
+  --radius-sm: calc(var(--radius) - 4px); /* 6px — inputs/buttons/badges */
+  --radius-md: calc(var(--radius) - 2px); /* 8px */
+  --radius-lg: var(--radius); /* 10px — cards */
+  --radius-xl: calc(var(--radius) + 4px); /* 14px — dialogs */
+
+  /* Actual typographic scale (§4.1) */
+  --text-xs: 0.75rem; /* 12 — metadata/caption */
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.8125rem; /* 13 — help */
+  --text-sm--line-height: 1.15rem;
+  --text-base: 0.875rem; /* 14 — body/labels */
+  --text-base--line-height: 1.4rem;
+  --text-lg: 1rem; /* 16 — section title */
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem; /* 20 — page title */
+  --text-xl--line-height: 1.6rem;
+
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* React Bits StarBorder — momentary highlight of the activated model (§4.4). */
+  --animate-star-movement-top: star-movement-top linear infinite alternate;
+  --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
+}
+
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body {
+    margin: 0;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: system-ui, sans-serif;
+    font-size: var(--text-base);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Micro-animations (§4.4) — subtle, <=200ms, respect prefers-reduced-motion.
+   Simple utility classes for components to reference by className.
+   -------------------------------------------------------------------------- */
+@keyframes wren-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wren-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes wren-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ring) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.animate-fade-in {
+  animation: wren-fade-in 0.18s ease-out;
+}
+.animate-pop {
+  animation: wren-pop 0.16s ease-out;
+}
+.animate-pulse-ring {
+  animation: wren-pulse-ring 1.5s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

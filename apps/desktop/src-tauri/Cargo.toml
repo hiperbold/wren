@@ -1,0 +1,37 @@
+[package]
+name = "wren-desktop"
+description = "Wren desktop app (Tauri v2): composition, tray, global shortcut, on-demand windows."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "wren_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+wren-core = { path = "../../../crates/wren-core" }
+wren-adapters = { path = "../../../crates/wren-adapters" }
+# Embedded engine — always present: it's just another provider selectable
+# at runtime (docs/architecture/provider-model.md). The ONNX weight only exists in the worker subprocess, which
+# only runs when dictating with the embedded provider; the resident process never loads it.
+wren-embedded = { path = "../../../crates/wren-embedded", features = ["inference"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = "0.4"
+tauri = { version = "2.11.5", features = ["tray-icon", "image-png", "unstable"] }
+tauri-plugin-global-shortcut = "2.3.2"
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+wgpu = "30.0.0"
+pollster = "0.4.0"
+bytemuck = { version = "1.25.0", features = ["derive"] }
+raw-window-handle = "0.6.2"
+
+# X Shape for the overlay (same gtk version that tao uses)
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18"

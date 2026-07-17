@@ -1,0 +1,1 @@
+O Wren usa Tauri com o núcleo em Rust e a interface em React. O overlay nativo desenha a pílula de gravação com wgpu, e a transcrição sai pela API do Groq. Nada de runtime de machine learning dentro do app base.

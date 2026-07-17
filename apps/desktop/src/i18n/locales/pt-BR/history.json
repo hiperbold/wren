@@ -1,0 +1,21 @@
+{
+  "header.title": "Histórico",
+  "header.description": "Seus últimos ditados, com status e métricas. Passe o mouse sobre um item para copiar ou reenviar.",
+  "search.placeholder": "Buscar no texto ditado ou no provider…",
+  "search.noResults": "Nenhum resultado para “{{query}}”.",
+  "loading": "Carregando…",
+  "empty.title": "Nenhum ditado ainda",
+  "empty.description": "Use o atalho global e seus ditados aparecerão aqui.",
+  "day.today": "Hoje",
+  "day.yesterday": "Ontem",
+  "meta.trimmed": "{{recorded}}s ditados → {{sent}}s enviados",
+  "meta.audio": "áudio {{secs}}s",
+  "meta.latency": "resposta {{ms}}ms",
+  "card.retryTitle": "Transcrever novamente com o provider ativo",
+  "card.retrying": "Reenviando…",
+  "card.retry": "Reenviar",
+  "card.copyTitle": "Copiar texto",
+  "card.copied": "Copiado",
+  "card.copy": "Copiar",
+  "card.failed": "Falha na transcrição — áudio preservado"
+}
