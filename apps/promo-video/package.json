@@ -1,0 +1,28 @@
+{
+  "name": "wren-promo-video",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Wren's promotional video, built 100% in code with Remotion (bubble recreated in web, no screen-capture).",
+  "type": "module",
+  "scripts": {
+    "audio": "node scripts/gen-audio.mjs",
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "render": "remotion render WrenPromo out/wren-promo.mp4",
+    "render:wide": "remotion render WrenPromoWide out/wren-promo-wide.mp4",
+    "still": "remotion still WrenPromo out/frame.png --frame=300",
+    "still:wide": "remotion still WrenPromoWide out/frame-wide.png --frame=300",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.486",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.486"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.2"
+  }
+}

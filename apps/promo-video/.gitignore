@@ -1,0 +1,11 @@
+node_modules
+out
+.remotion
+
+# Alternative music tracks (local audition only, not used by the render — the
+# active track is the synthesized public/music/ambient.wav). See CREDITS.md to
+# download any of them.
+public/music/carefree-kevin-macleod.mp3
+public/music/cheery-monday-kevin-macleod.mp3
+public/music/happy-alley-kevin-macleod.mp3
+public/music/long-note-two-kevin-macleod.mp3
