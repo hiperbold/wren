@@ -59,11 +59,11 @@ const en: Copy = {
   appBrowser: "Search",
   appChat: "#team",
   anywhere: "Wherever your cursor is.",
-  // Order: hook-benefit (speed) → emotional (privacy) → brand (lightness).
+  // Order: hook-benefit (speed) → emotional (privacy/offline) → brand (lightness).
   // Short headlines: each benefit gets the full screen, one at a time.
   props: [
     { title: "3× faster than typing", sub: "Speak a paragraph in the time you'd type a line." },
-    { title: "Private by default", sub: "Your audio never leaves your machine." },
+    { title: "No cloud required", sub: "A built-in local model — no internet, no server, nothing leaves your machine." },
     { title: "Feather-light", sub: "So light you forget it's running." },
   ],
   stateListening: "Listening",
@@ -87,11 +87,11 @@ const pt: Copy = {
   appBrowser: "Buscar",
   appChat: "#time",
   anywhere: "Onde o cursor estiver.",
-  // Order: hook-benefit (speed) → emotional (privacy) → brand (lightness).
+  // Order: hook-benefit (speed) → emotional (privacy/offline) → brand (lightness).
   // Short headlines: each benefit gets the full screen, one at a time.
   props: [
     { title: "3× mais rápido que digitar", sub: "Fale um parágrafo no tempo de digitar uma linha." },
-    { title: "Privado por padrão", sub: "Seu áudio nunca sai da sua máquina." },
+    { title: "Sem depender da nuvem", sub: "Modelo local embutido — sem internet, sem servidor, nada sai da sua máquina." },
     { title: "Leve como pluma", sub: "Tão leve que você esquece que está rodando." },
   ],
   stateListening: "Ouvindo",

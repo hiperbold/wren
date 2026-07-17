@@ -22,7 +22,7 @@ Wren is a desktop dictation app where transcription is a **pluggable provider**:
 
 - Start with an **external API** (cloud): fast to run, tiny app, no model download.
 - Run a **local server** by pointing the same app to `localhost` when you want privacy or zero cost.
-- In the future, use an **embedded engine** (pure offline) — without changing apps or relearning anything.
+- Or go fully **embedded** (pure offline, one-click model download) — without changing apps or relearning anything.
 
 All through the **same provider configuration** (endpoint + credential + model).
 
@@ -59,9 +59,12 @@ During recording, Wren shows a **small bubble, centered in the lower part of the
 - ✅ Local history + persisted settings.
 - ✅ Minimal configuration UI (choose provider, shortcut, language).
 
-## Out of MVP Scope (But Planned in Architecture)
+## Beyond the Initial MVP
 
-- ⏳ **Embedded transcription engine** (whisper.cpp / ONNX running in-process). Becomes a separate module later.
+Not part of the first release, but built into the architecture from day one —
+status below reflects where each stands now:
+
+- ✅ **Embedded transcription engine** (offline, one-click model download, no external process) — shipped as its own module; see the [roadmap](../roadmap.md) and the [embedded engine reference](../architecture/embedded-engine.md).
 - ⏳ **LLM post-processing.** The port exists from day one, but implementation may come in a later refinement.
 - ⏳ Real-time streaming (transcription while you speak).
 - ⏳ Diarization, translation, voice commands.

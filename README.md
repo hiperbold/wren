@@ -24,9 +24,9 @@
 Wren is a desktop dictation (speech-to-text) app that treats **every
 transcription engine as a swappable backend**. Press a global shortcut, speak,
 and the transcribed text is typed wherever your cursor is. The transcription can
-come from an **external API** (cloud), a **local server**, or — soon — an
-**embedded engine**, all behind the same interface, so the app is never locked
-to any single provider.
+come from an **external API** (cloud), a **local server**, or an **embedded
+engine** (fully offline, one-click model download), all behind the same
+interface, so the app is never locked to any single provider.
 
 The name comes from the wren (Portuguese *corruíra*) — a tiny, discreet,
 homely bird with a voice that's powerful for its size. That's the project in a
