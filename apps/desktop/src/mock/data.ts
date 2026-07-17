@@ -127,7 +127,7 @@ export const history = [
     audio_duration_ms: 6200,
     recorded_duration_ms: 8100,
     created_at_ms: now - 4 * min,
-    audio_path: "/home/rafael/.local/share/wren/recordings/2026-07-12-1.wav",
+    audio_path: "/home/user/.local/share/wren/recordings/2026-07-12-1.wav",
   },
   {
     status: "done",
@@ -137,7 +137,7 @@ export const history = [
     audio_duration_ms: 3400,
     recorded_duration_ms: 3400,
     created_at_ms: now - 22 * min,
-    audio_path: "/home/rafael/.local/share/wren/recordings/2026-07-12-2.wav",
+    audio_path: "/home/user/.local/share/wren/recordings/2026-07-12-2.wav",
   },
   {
     status: "failed",
@@ -148,7 +148,7 @@ export const history = [
     recorded_duration_ms: 5100,
     created_at_ms: now - 51 * min,
     error: "429 Too Many Requests — provider quota exceeded",
-    audio_path: "/home/rafael/.local/share/wren/recordings/2026-07-12-3.wav",
+    audio_path: "/home/user/.local/share/wren/recordings/2026-07-12-3.wav",
   },
   {
     status: "done",
@@ -158,7 +158,7 @@ export const history = [
     audio_duration_ms: 9800,
     recorded_duration_ms: 12400,
     created_at_ms: now - 3 * 60 * min,
-    audio_path: "/home/rafael/.local/share/wren/recordings/2026-07-12-4.wav",
+    audio_path: "/home/user/.local/share/wren/recordings/2026-07-12-4.wav",
   },
   {
     status: "done",
@@ -168,7 +168,7 @@ export const history = [
     audio_duration_ms: 4300,
     recorded_duration_ms: 4300,
     created_at_ms: now - 26 * 60 * min,
-    audio_path: "/home/rafael/.local/share/wren/recordings/2026-07-11-9.wav",
+    audio_path: "/home/user/.local/share/wren/recordings/2026-07-11-9.wav",
   },
 ];
 
@@ -354,4 +354,4 @@ export const embeddedCatalog = [
 /** Ids of already-downloaded models. Parakeet downloaded (shows "Offline"). */
 export const embeddedLocal = ["parakeet-v3"];
 
-export const logFilePath = "/home/rafael/.local/share/wren/logs/wren.log";
+export const logFilePath = "/home/user/.local/share/wren/logs/wren.log";
