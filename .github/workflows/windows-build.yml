@@ -18,14 +18,27 @@ jobs:
           node-version: 20
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Install frontend deps
         run: npm ci
         working-directory: apps/desktop
 
       - name: Build Tauri app (NSIS installer)
-        run: npx tauri build --bundles nsis
+        shell: pwsh
         working-directory: apps/desktop
+        run: |
+          # The NSIS tooling download from GitHub occasionally times out on the
+          # runner; a retry reuses the finished cargo build and only redoes the
+          # bundling step, so it is cheap.
+          $attempts = 0
+          do {
+            npx tauri build --bundles nsis
+            $code = $LASTEXITCODE
+            $attempts++
+          } while ($code -ne 0 -and $attempts -lt 3)
+          exit $code
 
       - name: List bundle output
         shell: pwsh
