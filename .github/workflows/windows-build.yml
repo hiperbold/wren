@@ -24,7 +24,7 @@ jobs:
         working-directory: apps/desktop
 
       - name: Build Tauri app (NSIS installer)
-        run: npm run tauri build -- -- --bundles nsis
+        run: npx tauri build --bundles nsis
         working-directory: apps/desktop
 
       - name: List bundle output
