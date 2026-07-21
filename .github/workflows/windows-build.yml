@@ -1,0 +1,40 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [windows-build]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: apps/desktop
+
+      - name: Build Tauri app (NSIS installer)
+        run: npm run tauri build -- -- --bundles nsis
+        working-directory: apps/desktop
+
+      - name: List bundle output
+        shell: pwsh
+        run: Get-ChildItem -Recurse target/release/bundle | Select-Object FullName
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wren-windows
+          path: |
+            target/release/bundle/nsis/*.exe
+            target/release/wren-desktop.exe
+          if-no-files-found: error
