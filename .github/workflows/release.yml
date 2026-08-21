@@ -11,7 +11,11 @@ permissions:
 
 jobs:
   linux:
-    runs-on: ubuntu-22.04
+    # ort-sys's prebuilt ONNX Runtime binary references glibc 2.38+ symbols
+    # (__isoc23_strtoll and friends), which ubuntu-22.04's glibc 2.35 lacks —
+    # https://github.com/ziglang/zig/issues/17536. Note this raises the
+    # minimum glibc the built .deb/AppImage requires on end-user machines.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +24,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
+            libayatana-appindicator3-dev \
             librsvg2-dev \
             patchelf \
             libssl-dev \
