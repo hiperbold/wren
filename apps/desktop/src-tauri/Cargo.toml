@@ -35,3 +35,8 @@ raw-window-handle = "0.6.2"
 # X Shape for the overlay (same gtk version that tao uses)
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18"
+
+# Transparent windows on macOS require Apple's private API, gated behind this
+# feature — matches app.macOSPrivateApi in tauri.macos.conf.json.
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri = { version = "2.11.5", features = ["macos-private-api"] }
