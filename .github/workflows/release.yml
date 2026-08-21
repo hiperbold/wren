@@ -27,7 +27,8 @@ jobs:
             libglib2.0-dev \
             libgtk-3-dev \
             libsoup-3.0-dev \
-            libjavascriptcoregtk-4.1-dev
+            libjavascriptcoregtk-4.1-dev \
+            libasound2-dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -85,14 +86,11 @@ jobs:
           args: --target x86_64-pc-windows-msvc
 
   macos:
+    # Apple Silicon only: ort (ONNX Runtime bindings, used by the embedded
+    # transcription engine) ships no prebuilt binary for x86_64-apple-darwin
+    # — https://github.com/pykeio/ort/issues/556. Intel Mac support would
+    # require compiling ONNX Runtime from source.
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: aarch64-apple-darwin # Apple Silicon (M1 and above)
-          - target: x86_64-apple-darwin # Intel
-
     steps:
       - uses: actions/checkout@v4
 
@@ -104,7 +102,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: aarch64-apple-darwin
 
       - name: Install frontend dependencies
         working-directory: apps/desktop
@@ -121,4 +119,4 @@ jobs:
           releaseBody: "See the assets below to download and install Wren."
           releaseDraft: true
           prerelease: false
-          args: --target ${{ matrix.target }}
+          args: --target aarch64-apple-darwin
