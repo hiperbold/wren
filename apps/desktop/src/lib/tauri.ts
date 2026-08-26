@@ -41,6 +41,13 @@ export interface Settings {
   launch_at_login: boolean;
   /** Minimum severity captured by the local logger. Default: "info". */
   log_level: LogLevel;
+  /** Has the first-run onboarding wizard been completed (or skipped)? */
+  onboarding_completed: boolean;
+}
+
+/** Coarse machine-capability hint (mirrors `HardwareInfoDto`, camelCase). */
+export interface HardwareInfo {
+  cpuCores: number;
 }
 
 /** A log record (mirrors `LogRecord`). */
@@ -144,6 +151,7 @@ export const tauri = {
     invoke<void>("embedded_download_model", { id }),
   embeddedDeleteModel: (id: string) =>
     invoke<void>("embedded_delete_model", { id }),
+  hardwareInfo: () => invoke<HardwareInfo>("hardware_info"),
 };
 
 /** Subscribes to embedded download progress. Resolves to the unlisten function;

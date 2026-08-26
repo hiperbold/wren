@@ -62,7 +62,12 @@ export const settings = {
   restore_clipboard: false,
   launch_at_login: true,
   log_level: "info",
+  // false so `npm run dev:mock` shows the onboarding wizard by default — the
+  // main UI review surface for it (see App.tsx's onboarding gate).
+  onboarding_completed: false,
 };
+
+export const hardwareInfo = { cpuCores: 8 };
 
 export const providerPresets = [
   {

@@ -31,5 +31,8 @@
   "updates.check": "Verificar atualizações",
   "updates.checking": "Verificando…",
   "updates.error": "Erro ao verificar: {{error}}",
-  "updates.description": "Procura uma versão nova e instala se houver."
+  "updates.description": "Procura uma versão nova e instala se houver.",
+  "onboarding.title": "Assistente de configuração",
+  "onboarding.description": "Refaça o assistente de primeira execução (escolha do motor, atalho e um teste rápido) sem perder o resto das suas configurações.",
+  "onboarding.button": "Refazer assistente de configuração"
 }

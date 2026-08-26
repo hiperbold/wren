@@ -31,5 +31,8 @@
   "updates.check": "Check for updates",
   "updates.checking": "Checking…",
   "updates.error": "Error while checking: {{error}}",
-  "updates.description": "Looks for a new version and installs it if there is one."
+  "updates.description": "Looks for a new version and installs it if there is one.",
+  "onboarding.title": "Setup wizard",
+  "onboarding.description": "Redo the first-run wizard (engine choice, shortcut, and a quick test) without losing your other settings.",
+  "onboarding.button": "Redo setup wizard"
 }

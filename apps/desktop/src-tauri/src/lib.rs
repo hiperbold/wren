@@ -657,6 +657,26 @@ struct ModelInfoDto {
     size_bytes: u64,
 }
 
+/// Coarse machine-capability hint for the onboarding wizard's local-model
+/// step. Deliberately minimal (CPU core count only, via `std` — no new
+/// dependency): a real GPU/CUDA/CoreML capability check is a separate,
+/// dedicated spike, not something to fake here.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HardwareInfoDto {
+    cpu_cores: usize,
+}
+
+/// Reports a coarse hardware hint (CPU core count) for the onboarding
+/// wizard's local-model recommendation. See `HardwareInfoDto`.
+#[tauri::command]
+fn hardware_info() -> HardwareInfoDto {
+    let cpu_cores = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+    HardwareInfoDto { cpu_cores }
+}
+
 /// Event emitted on `embedded://download-progress` during the download.
 #[derive(Clone, serde::Serialize)]
 struct DownloadProgressEvent {
@@ -781,7 +801,8 @@ pub fn run() {
             embedded_catalog,
             embedded_local_models,
             embedded_download_model,
-            embedded_delete_model
+            embedded_delete_model,
+            hardware_info
         ])
         .setup(|app| {
             let handle = app.handle().clone();

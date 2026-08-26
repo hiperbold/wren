@@ -98,6 +98,7 @@ export default function SystemView() {
   const { t } = useTranslation("system");
   const settings = useSettingsStore((s) => s.settings);
   const setField = useSettingsStore((s) => s.setField);
+  const saveNow = useSettingsStore((s) => s.saveNow);
   const checkUpdates = useCheckUpdates();
 
   if (!settings) return null;
@@ -243,6 +244,27 @@ export default function SystemView() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t("updates.description")}
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("onboarding.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {t("onboarding.description")}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setField("onboarding_completed", false);
+              saveNow();
+            }}
+          >
+            {t("onboarding.button")}
+          </Button>
         </CardContent>
       </Card>
     </div>

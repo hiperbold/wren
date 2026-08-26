@@ -1,0 +1,63 @@
+{
+  "skip": "Skip — I'll set it up later",
+  "back": "Back",
+  "next": "Continue",
+  "finish": "Finish",
+  "stepOf": "Step {{current}} of {{total}}",
+
+  "welcome.title": "Welcome to Wren",
+  "welcome.description": "Wren turns your voice into text anywhere you can type. Press a shortcut, speak, and the transcription lands wherever your cursor is. Let's set up the essentials — it only takes a minute.",
+  "welcome.cta": "Get started",
+
+  "engine.title": "Where should transcription happen?",
+  "engine.description": "This is the most important choice: it decides whether your voice ever leaves this computer.",
+  "engine.local.title": "On this computer (local)",
+  "engine.local.description": "Private by default — audio never leaves your machine. Runs a speech model on your own hardware; needs a one-time download and depends on your computer's power.",
+  "engine.remote.title": "A remote service (e.g. Groq)",
+  "engine.remote.description": "Faster and more accurate on modest hardware, but your audio is sent to that service's servers. Requires a free account and an API key.",
+  "engine.technical": "Technical details",
+  "engine.technicalNote": "Both paths implement the same Transcriber contract, so you can switch providers later in Settings → Provider without losing anything else you configure here.",
+
+  "local.title": "Choose a local model",
+  "local.description": "Larger models transcribe more accurately but need more computer power and disk space.",
+  "local.recommended": "Recommended",
+  "local.hardwareNote.ok": "Your computer looks capable of running this comfortably.",
+  "local.hardwareNote.limited": "Your computer has only {{cores}} CPU core(s). Local transcription will still work, but long dictations may feel slow — if that happens, try a smaller model or switch to a remote provider later in Settings.",
+  "local.download": "Download",
+  "local.downloading": "Downloading…",
+  "local.activate": "Use this model",
+  "local.active": "Selected",
+  "local.retry": "Retry",
+
+  "remote.title": "Connect a remote provider",
+  "remote.description": "We've pre-filled Groq (fast, free-tier available). You can change this later in Settings → Provider.",
+  "remote.stepsTitle": "How to get a key",
+  "remote.step1": "Create a free account at console.groq.com",
+  "remote.step2": "Open \"API Keys\" and click \"Create API Key\"",
+  "remote.step3": "Copy the key and paste it below",
+  "remote.openConsole": "Open the step-by-step guide",
+  "remote.apiKey.label": "API key",
+  "remote.apiKey.placeholder": "Paste your key here",
+  "remote.apiKey.hint": "Stored only on this computer, never shared except with the provider you chose.",
+  "remote.apiKey.show": "Show key",
+  "remote.apiKey.hide": "Hide key",
+
+  "shortcut.title": "Set your dictation shortcut",
+  "shortcut.description": "Press this combination anywhere to start dictating; press it again (or release, in push-to-talk) to stop. The text is delivered wherever your cursor is — no need to switch back to Wren.",
+
+  "test.title": "Try it out",
+  "test.description": "Click the field below, then use your shortcut and say this phrase out loud:",
+  "test.placeholder": "Your dictated text will appear here…",
+  "test.success": "It worked! Wren is ready to use.",
+  "test.phrases": [
+    "Testing Wren for the first time today.",
+    "The quick brown fox jumps over the lazy dog.",
+    "This is my new voice dictation setup.",
+    "Coffee first, then I'll answer these emails.",
+    "Remember to send the report by Friday."
+  ],
+
+  "done.title": "All set",
+  "done.description": "You can change any of this later in Settings. Happy dictating!",
+  "done.cta": "Start using Wren"
+}
