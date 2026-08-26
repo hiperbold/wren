@@ -348,6 +348,13 @@ pub struct Settings {
     /// settings.json ⇒ `Info`.
     #[serde(default)]
     pub log_level: LogLevel,
+    /// Has the first-run onboarding wizard been completed (or skipped)?
+    /// Absent in old settings.json ⇒ `true` — an existing install already
+    /// configured everything the wizard would ask, so it must not resurface
+    /// for upgrading users. Only `Settings::default()` (no settings.json at
+    /// all yet, i.e. a genuinely new install) sets this to `false`.
+    #[serde(default = "default_onboarding_completed")]
+    pub onboarding_completed: bool,
 }
 
 fn default_compress_pauses_over_ms() -> Option<u64> {
@@ -360,6 +367,10 @@ fn default_play_sounds() -> bool {
 
 fn default_cancel_shortcut() -> String {
     "Escape".into()
+}
+
+fn default_onboarding_completed() -> bool {
+    true
 }
 
 /// Catalog of presets the UI offers on "add provider". The single source of
@@ -484,6 +495,7 @@ impl Default for Settings {
             restore_clipboard: false,
             launch_at_login: false,
             log_level: LogLevel::default(),
+            onboarding_completed: false,
         }
     }
 }
@@ -518,6 +530,27 @@ mod tests {
         }"#;
         let settings: Settings = serde_json::from_str(raw).unwrap();
         assert_eq!(settings.compress_pauses_over_ms, None);
+    }
+
+    /// Backward compatibility: settings.json predating onboarding (without
+    /// `onboarding_completed`) loads as already completed — an existing
+    /// install must not be sent back through the first-run wizard.
+    #[test]
+    fn settings_missing_onboarding_completed_loads_true() {
+        let raw = r#"{
+            "active_provider_id": "groq",
+            "providers": [],
+            "shortcut": "ctrl+shift+space",
+            "language": "pt"
+        }"#;
+        let settings: Settings = serde_json::from_str(raw).unwrap();
+        assert!(settings.onboarding_completed);
+    }
+
+    /// A genuinely new install (no settings.json at all) gets the wizard.
+    #[test]
+    fn default_settings_have_onboarding_incomplete() {
+        assert!(!Settings::default().onboarding_completed);
     }
 
     /// Backward compatibility: settings.json predating push-to-talk (without

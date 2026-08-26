@@ -83,6 +83,8 @@ export async function invoke<T>(cmd: string, args?: InvokeArgs): Promise<T> {
       return undefined as T;
     case "embedded_delete_model":
       return undefined as T;
+    case "hardware_info":
+      return clone(data.hardwareInfo) as T;
     // Event-plugin commands (in case something calls via core): resolve.
     case "plugin:event|listen":
     case "plugin:event|unlisten":

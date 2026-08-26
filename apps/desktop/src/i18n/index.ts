@@ -13,6 +13,7 @@ import en_audio from "./locales/en/audio.json";
 import en_system from "./locales/en/system.json";
 import en_history from "./locales/en/history.json";
 import en_diagnostics from "./locales/en/diagnostics.json";
+import en_onboarding from "./locales/en/onboarding.json";
 
 import ptBR_common from "./locales/pt-BR/common.json";
 import ptBR_nav from "./locales/pt-BR/nav.json";
@@ -23,6 +24,7 @@ import ptBR_audio from "./locales/pt-BR/audio.json";
 import ptBR_system from "./locales/pt-BR/system.json";
 import ptBR_history from "./locales/pt-BR/history.json";
 import ptBR_diagnostics from "./locales/pt-BR/diagnostics.json";
+import ptBR_onboarding from "./locales/pt-BR/onboarding.json";
 
 export const NAMESPACES = [
   "common",
@@ -34,6 +36,7 @@ export const NAMESPACES = [
   "system",
   "history",
   "diagnostics",
+  "onboarding",
 ] as const;
 
 const resources = {
@@ -47,6 +50,7 @@ const resources = {
     system: en_system,
     history: en_history,
     diagnostics: en_diagnostics,
+    onboarding: en_onboarding,
   },
   "pt-BR": {
     common: ptBR_common,
@@ -58,6 +62,7 @@ const resources = {
     system: ptBR_system,
     history: ptBR_history,
     diagnostics: ptBR_diagnostics,
+    onboarding: ptBR_onboarding,
   },
 } as const;
 

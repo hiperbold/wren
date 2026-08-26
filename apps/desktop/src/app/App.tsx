@@ -3,19 +3,25 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SaveIndicator } from "@/components/SaveIndicator";
+import Onboarding from "@/onboarding/Onboarding";
 import { useSettingsQuery } from "@/lib/queries";
 import { useSettingsStore } from "@/lib/store";
 import { NAV } from "./nav";
 import { Sidebar } from "./Sidebar";
 
 /** App shell: sidebar + content area (with per-view Suspense) + the "Saved"
- * toaster. Hydrates the settings store from the initial `get_settings`. */
+ * toaster. Hydrates the settings store from the initial `get_settings`. Before
+ * the sidebar shell mounts, gates on `settings.onboarding_completed` — a
+ * fresh install (or a user-triggered redo, see SystemView) shows the
+ * full-screen wizard instead. Reactive (a store selector, not a one-time
+ * check), so toggling the flag anywhere swaps the shell without a reload. */
 export function App() {
   const { t } = useTranslation("common");
   const [active, setActive] = useState(NAV[0].id);
   const settingsQuery = useSettingsQuery();
   const hydrate = useSettingsStore((s) => s.hydrate);
-  const hydrated = useSettingsStore((s) => s.settings !== null);
+  const settings = useSettingsStore((s) => s.settings);
+  const hydrated = settings !== null;
 
   // Seed the store once when the initial value arrives (never overwrite edits).
   useEffect(() => {
@@ -23,6 +29,15 @@ export function App() {
   }, [settingsQuery.data, hydrate]);
 
   const Active = NAV.find((n) => n.id === active)?.Component ?? NAV[0].Component;
+
+  if (hydrated && !settings.onboarding_completed) {
+    return (
+      <TooltipProvider delayDuration={300}>
+        <Onboarding />
+        <SaveIndicator />
+      </TooltipProvider>
+    );
+  }
 
   return (
     <TooltipProvider delayDuration={300}>
