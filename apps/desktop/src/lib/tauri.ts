@@ -43,6 +43,15 @@ export interface Settings {
   log_level: LogLevel;
   /** Has the first-run onboarding wizard been completed (or skipped)? */
   onboarding_completed: boolean;
+  /** Learned whether the overlay's cold-start GL backend probe is worth
+   * trying on this machine (see `GpuBackendLearning` in wren-core). */
+  gpu_backend_learning: GpuBackendLearning;
+}
+
+export interface GpuBackendLearning {
+  sessions_observed: number;
+  gl_failures: number;
+  skip_gl_probe: boolean;
 }
 
 /** Coarse machine-capability hint (mirrors `HardwareInfoDto`, camelCase). */

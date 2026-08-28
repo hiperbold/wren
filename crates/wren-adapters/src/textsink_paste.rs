@@ -114,29 +114,47 @@ fn read_clipboard_text() -> Option<String> {
 }
 
 /// Emits the paste shortcut via enigo.
+///
+/// Modifier releases are attempted unconditionally, even if an earlier step
+/// (the Press, or the Unicode 'v' Click — X11 synthetic Unicode input requires
+/// a live keycode remap and can fail transiently) errored out. `.and_then()`
+/// chaining would abandon the Release on any earlier failure, stranding the
+/// modifier "held" in the X server's core keyboard state — state that belongs
+/// to the X server, not this process, so it survives a Wren restart and only
+/// clears on an X session/reboot.
 fn press_paste(keys: PasteShortcut) -> Result<(), PortError> {
-    let mut enigo =
-        Enigo::new(&EnigoSettings::default()).map_err(|e| PortError::DeliveryFailed(e.to_string()))?;
-    let result = match keys {
-        PasteShortcut::CtrlV => enigo
-            .key(Key::Control, Direction::Press)
-            .and_then(|_| enigo.key(Key::Unicode('v'), Direction::Click))
-            .and_then(|_| enigo.key(Key::Control, Direction::Release)),
-        PasteShortcut::CtrlShiftV => enigo
-            .key(Key::Control, Direction::Press)
-            .and_then(|_| enigo.key(Key::Shift, Direction::Press))
-            .and_then(|_| enigo.key(Key::Unicode('v'), Direction::Click))
-            .and_then(|_| enigo.key(Key::Shift, Direction::Release))
-            .and_then(|_| enigo.key(Key::Control, Direction::Release)),
+    let mut enigo = Enigo::new(&EnigoSettings::default())
+        .map_err(|e| PortError::DeliveryFailed(e.to_string()))?;
+
+    let modifiers: &[Key] = match keys {
+        PasteShortcut::CtrlV => &[Key::Control],
+        PasteShortcut::CtrlShiftV => &[Key::Control, Key::Shift],
     };
-    result.map_err(|e| PortError::DeliveryFailed(e.to_string()))
+
+    let press_and_click = (|| {
+        for &m in modifiers {
+            enigo.key(m, Direction::Press)?;
+        }
+        enigo.key(Key::Unicode('v'), Direction::Click)
+    })();
+
+    let mut release_err = None;
+    for &m in modifiers.iter().rev() {
+        if let Err(e) = enigo.key(m, Direction::Release) {
+            release_err.get_or_insert(e);
+        }
+    }
+
+    press_and_click
+        .and(release_err.map_or(Ok(()), Err))
+        .map_err(|e| PortError::DeliveryFailed(e.to_string()))
 }
 
 /// Direct synthetic typing (does not use the clipboard). Accents/layout may come
 /// out wrong on X11 (doc 05) — it is the price of not relying on pasting.
 fn deliver_via_typing(text: &str) -> Result<(), PortError> {
-    let mut enigo =
-        Enigo::new(&EnigoSettings::default()).map_err(|e| PortError::DeliveryFailed(e.to_string()))?;
+    let mut enigo = Enigo::new(&EnigoSettings::default())
+        .map_err(|e| PortError::DeliveryFailed(e.to_string()))?;
     enigo
         .text(text)
         .map_err(|e| PortError::DeliveryFailed(e.to_string()))

@@ -70,6 +70,9 @@ const LOG_LEVELS: { value: LogLevel; labelKey: string }[] = [
   { value: "trace", labelKey: "logging.level.trace" },
 ];
 
+/** Mirrors `GPU_LEARNING_SAMPLE_TARGET` in wren-core's `domain.rs`. */
+const GPU_LEARNING_SAMPLE_TARGET = 6;
+
 /** Subtle (i) with a tooltip hint — replaces the old tiny ⓘ marks. */
 function InfoHint({ label }: { label: string }) {
   const { t } = useTranslation("system");
@@ -244,6 +247,46 @@ export default function SystemView() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t("updates.description")}
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("advanced.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Field
+            label={t("advanced.gpuProbe.title")}
+            hint={t("advanced.gpuProbe.hint")}
+          >
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setField("gpu_backend_learning", {
+                    sessions_observed: 0,
+                    gl_failures: 0,
+                    skip_gl_probe: false,
+                  });
+                  saveNow();
+                }}
+              >
+                {t("advanced.gpuProbe.reset")}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {settings.gpu_backend_learning.skip_gl_probe
+                  ? t("advanced.gpuProbe.optimized")
+                  : settings.gpu_backend_learning.sessions_observed >=
+                      GPU_LEARNING_SAMPLE_TARGET
+                    ? t("advanced.gpuProbe.notNeeded")
+                    : t("advanced.gpuProbe.learning", {
+                        count: settings.gpu_backend_learning.sessions_observed,
+                        target: GPU_LEARNING_SAMPLE_TARGET,
+                      })}
+              </span>
+            </div>
+          </Field>
         </CardContent>
       </Card>
 

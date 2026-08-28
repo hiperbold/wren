@@ -66,6 +66,15 @@ pub struct AppState {
     shortcut_lock: Mutex<()>,
 }
 
+impl AppState {
+    /// Exposed to `overlay_native` so the native overlay's cold-start GPU
+    /// backend probe can read/persist `Settings::gpu_backend_learning`
+    /// without threading a new parameter through `NativeOverlay::open`.
+    pub(crate) fn settings_store(&self) -> &Arc<JsonSettingsStore> {
+        &self.settings_store
+    }
+}
+
 fn build_service(
     app: &AppHandle,
     settings: &Settings,

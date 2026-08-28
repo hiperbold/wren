@@ -9,6 +9,20 @@ on:
 permissions:
   contents: write
 
+env:
+  # Wren isn't code-signed yet (no Authenticode/Apple Developer ID
+  # certificate), so unsigned builds trip each OS's "unrecognized app"
+  # gatekeeping. Not a Wren bug — surface the workaround directly in the
+  # release notes instead of leaving people stuck on the OS dialog.
+  RELEASE_BODY: |
+    See the assets below to download and install Wren.
+
+    > **Heads-up:** Wren isn't code-signed yet, so your OS may warn that the app is "unrecognized":
+    > - **Windows (SmartScreen):** click "More info" → "Run anyway".
+    > - **macOS (Gatekeeper):** right-click the app → "Open" → "Open" again.
+    >
+    > This is expected for a new, unsigned open-source app — not a threat.
+
 jobs:
   linux:
     # ort-sys's prebuilt ONNX Runtime binary references glibc 2.38+ symbols
@@ -54,7 +68,7 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: "Wren ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download and install Wren."
+          releaseBody: ${{ env.RELEASE_BODY }}
           releaseDraft: true
           prerelease: false
           args: --target x86_64-unknown-linux-gnu
@@ -84,7 +98,7 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: "Wren ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download and install Wren."
+          releaseBody: ${{ env.RELEASE_BODY }}
           releaseDraft: true
           prerelease: false
           args: --target x86_64-pc-windows-msvc
@@ -120,7 +134,7 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: "Wren ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download and install Wren."
+          releaseBody: ${{ env.RELEASE_BODY }}
           releaseDraft: true
           prerelease: false
           args: --target aarch64-apple-darwin
