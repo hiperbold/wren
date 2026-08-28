@@ -6525,7 +6525,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "wren-adapters"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arboard",
  "audioadapter-buffers",
@@ -6547,7 +6547,7 @@ dependencies = [
 
 [[package]]
 name = "wren-bench"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "hound",
  "serde",
@@ -6558,7 +6558,7 @@ dependencies = [
 
 [[package]]
 name = "wren-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -6567,7 +6567,7 @@ dependencies = [
 
 [[package]]
 name = "wren-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "gtk",
@@ -6590,7 +6590,7 @@ dependencies = [
 
 [[package]]
 name = "wren-embedded"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dirs 6.0.0",
  "log",
