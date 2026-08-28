@@ -65,6 +65,8 @@ export const settings = {
   // false so `npm run dev:mock` shows the onboarding wizard by default — the
   // main UI review surface for it (see App.tsx's onboarding gate).
   onboarding_completed: false,
+  // Already converged, to show the "optimized" state in mock mode.
+  gpu_backend_learning: { sessions_observed: 6, gl_failures: 6, skip_gl_probe: true },
 };
 
 export const hardwareInfo = { cpuCores: 8 };
