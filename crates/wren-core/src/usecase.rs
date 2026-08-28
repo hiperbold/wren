@@ -512,7 +512,10 @@ mod tests {
     }
     impl FakeAudio {
         fn new() -> Self {
-            FakeAudio { aborted: AtomicBool::new(false), fail_on_start: false }
+            FakeAudio {
+                aborted: AtomicBool::new(false),
+                fail_on_start: false,
+            }
         }
     }
     impl AudioSource for FakeAudio {
@@ -555,14 +558,19 @@ mod tests {
                     speech_ms: clip.duration_ms,
                 },
                 VadMode::NoSpeech => VadOutcome::NoSpeech,
-                VadMode::ShortSpeech(ms) => {
-                    VadOutcome::Speech { clip: clip.clone(), speech_ms: ms }
-                }
+                VadMode::ShortSpeech(ms) => VadOutcome::Speech {
+                    clip: clip.clone(),
+                    speech_ms: ms,
+                },
                 VadMode::Halved => {
                     let samples = clip.samples[..clip.samples.len() / 2].to_vec();
                     let duration_ms = clip.duration_ms / 2;
                     VadOutcome::Speech {
-                        clip: AudioClip { samples, sample_rate: clip.sample_rate, duration_ms },
+                        clip: AudioClip {
+                            samples,
+                            sample_rate: clip.sample_rate,
+                            duration_ms,
+                        },
                         speech_ms: duration_ms,
                     }
                 }
@@ -587,7 +595,10 @@ mod tests {
                 .iter()
                 .any(|e| e == "transcribing");
             self.transcribing_before_vad.store(seen, Ordering::SeqCst);
-            VadOutcome::Speech { clip: clip.clone(), speech_ms: clip.duration_ms }
+            VadOutcome::Speech {
+                clip: clip.clone(),
+                speech_ms: clip.duration_ms,
+            }
         }
     }
 
@@ -602,9 +613,17 @@ mod tests {
             _options: &TranscriptionOptions,
         ) -> Result<Transcript, PortError> {
             if self.fail.load(Ordering::SeqCst) {
-                return Err(PortError::ProviderRejected { status: 401, message: "bad key".into() });
+                return Err(PortError::ProviderRejected {
+                    status: 401,
+                    message: "bad key".into(),
+                });
             }
-            Ok(partial_transcript(self.text.clone(), Some("pt".into()), "fake", "fake-1"))
+            Ok(partial_transcript(
+                self.text.clone(),
+                Some("pt".into()),
+                "fake",
+                "fake-1",
+            ))
         }
     }
 
@@ -627,7 +646,12 @@ mod tests {
                 let _ = tx.send(());
             }
             let _ = self.release.lock().unwrap().recv();
-            Ok(partial_transcript(self.text.clone(), Some("pt".into()), "fake", "fake-1"))
+            Ok(partial_transcript(
+                self.text.clone(),
+                Some("pt".into()),
+                "fake",
+                "fake-1",
+            ))
         }
     }
 
@@ -749,8 +773,10 @@ mod tests {
     }
 
     fn service_with_vad(text: &str, fail: bool, vad: VadMode) -> Harness {
-        let transcriber =
-            Arc::new(FakeTranscriber { text: text.into(), fail: AtomicBool::new(fail) });
+        let transcriber = Arc::new(FakeTranscriber {
+            text: text.into(),
+            fail: AtomicBool::new(fail),
+        });
         let sink = Arc::new(FakeSink::default());
         let history = Arc::new(FakeHistory::default());
         let recordings = Arc::new(FakeRecordings::default());
@@ -767,7 +793,15 @@ mod tests {
             Arc::new(FakeClock(AtomicU64::new(1_000))),
             telemetry.clone(),
         ));
-        Harness { svc, transcriber, sink, history, recordings, feedback, telemetry }
+        Harness {
+            svc,
+            transcriber,
+            sink,
+            history,
+            recordings,
+            feedback,
+            telemetry,
+        }
     }
 
     #[test]
@@ -785,7 +819,10 @@ mod tests {
                 feedback: feedback.clone(),
                 transcribing_before_vad: transcribing_before_vad.clone(),
             }),
-            Arc::new(FakeTranscriber { text: "hi".into(), fail: AtomicBool::new(false) }),
+            Arc::new(FakeTranscriber {
+                text: "hi".into(),
+                fail: AtomicBool::new(false),
+            }),
             Arc::new(FakeSink::default()),
             Arc::new(FakeHistory::default()),
             Arc::new(FakeRecordings::default()),
@@ -967,7 +1004,10 @@ mod tests {
 
         assert_eq!(h.svc.state(), SessionState::Idle);
         assert!(h.sink.delivered.lock().unwrap().is_empty());
-        assert_eq!(h.feedback.events.lock().unwrap().last().unwrap(), "cancelled");
+        assert_eq!(
+            h.feedback.events.lock().unwrap().last().unwrap(),
+            "cancelled"
+        );
     }
 
     #[test]
@@ -997,7 +1037,9 @@ mod tests {
         let telemetry = Arc::new(FakeTelemetry::default());
         let svc = Arc::new(DictationService::new(
             Arc::new(FakeAudio::new()),
-            Arc::new(FakeVad { mode: VadMode::Passthrough }),
+            Arc::new(FakeVad {
+                mode: VadMode::Passthrough,
+            }),
             transcriber,
             sink.clone(),
             history.clone(),
@@ -1019,7 +1061,11 @@ mod tests {
         enter_rx.recv().unwrap();
         assert_eq!(svc.state(), SessionState::Transcribing);
         svc.cancel();
-        assert_eq!(svc.state(), SessionState::Idle, "cancel must return to Idle immediately");
+        assert_eq!(
+            svc.state(),
+            SessionState::Idle,
+            "cancel must return to Idle immediately"
+        );
 
         // Release the hung transcription; it must DISCARD the result.
         release_tx.send(()).unwrap();
@@ -1030,7 +1076,12 @@ mod tests {
             "nothing may be delivered after the cancellation",
         );
         assert!(
-            history.saved.lock().unwrap().iter().all(|e| e.status != EntryStatus::Done),
+            history
+                .saved
+                .lock()
+                .unwrap()
+                .iter()
+                .all(|e| e.status != EntryStatus::Done),
             "no 'done' entry after the cancellation",
         );
         assert!(
@@ -1038,7 +1089,10 @@ mod tests {
             "the preserved audio must be cleaned up on discard",
         );
         let events = feedback.events.lock().unwrap();
-        assert!(events.iter().any(|e| e == "cancelled"), "must emit cancelled");
+        assert!(
+            events.iter().any(|e| e == "cancelled"),
+            "must emit cancelled"
+        );
         assert!(
             !events.iter().any(|e| e == "finished"),
             "must not emit finished after the cancellation",
@@ -1093,7 +1147,10 @@ mod tests {
         assert_eq!(records[0].outcome, SessionOutcome::DiscardedNoSpeech);
         assert_eq!(records[0].sent_audio_duration_ms, 0);
         // A discard never gets to transcribe or deliver.
-        assert!(records[0].stages.iter().all(|s| s.stage != Stage::Transcribe));
+        assert!(records[0]
+            .stages
+            .iter()
+            .all(|s| s.stage != Stage::Transcribe));
     }
 
     #[test]
@@ -1107,7 +1164,10 @@ mod tests {
         assert_eq!(records.len(), 1);
         assert_eq!(records[0].outcome, SessionOutcome::Failed);
         // The transcription was attempted (stage present), but there was no delivery.
-        assert!(records[0].stages.iter().any(|s| s.stage == Stage::Transcribe));
+        assert!(records[0]
+            .stages
+            .iter()
+            .any(|s| s.stage == Stage::Transcribe));
         assert!(records[0].stages.iter().all(|s| s.stage != Stage::Deliver));
     }
 }

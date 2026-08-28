@@ -17,23 +17,20 @@ pub fn open_settings_window(app: &AppHandle) {
         return;
     }
 
-    let result = WebviewWindowBuilder::new(
-        app,
-        SETTINGS_LABEL,
-        WebviewUrl::App("index.html".into()),
-    )
-    .title("Wren — Settings")
-    // New layout (redesign): 200px sidebar + content centered up to 840px with
-    // side padding — the old design's single 520px column cramped the navigation
-    // and the data screens (History/Diagnostics). Size verified visually at
-    // ~1000px width.
-    .inner_size(1000.0, 780.0)
-    .min_inner_size(720.0, 560.0)
-    .resizable(true)
-    // Dark background from the first paint — without this the webview flashes
-    // white before the React bundle mounts and applies the theme.
-    .background_color(THEME_BG)
-    .build();
+    let result =
+        WebviewWindowBuilder::new(app, SETTINGS_LABEL, WebviewUrl::App("index.html".into()))
+            .title("Wren — Settings")
+            // New layout (redesign): 200px sidebar + content centered up to 840px with
+            // side padding — the old design's single 520px column cramped the navigation
+            // and the data screens (History/Diagnostics). Size verified visually at
+            // ~1000px width.
+            .inner_size(1000.0, 780.0)
+            .min_inner_size(720.0, 560.0)
+            .resizable(true)
+            // Dark background from the first paint — without this the webview flashes
+            // white before the React bundle mounts and applies the theme.
+            .background_color(THEME_BG)
+            .build();
 
     if let Err(e) = result {
         log::error!(target: "wren::window", "failed to create settings window: {e}");
