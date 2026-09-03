@@ -95,12 +95,16 @@ Behavioral hot spots — change only with explicit intent, never as a drive-by:
 
 ## Windows fork (hiperbold)
 
-This clone is the `hiperbold/wren` fork, branch `windows-build`, kept only to
-build the Windows installer via GitHub Actions
-(`.github/workflows/windows-build.yml`, NSIS bundle, with a retry for the
-bundler's transient download timeouts). There is no Rust/MSVC toolchain on
-this machine — always build through Actions. `main` tracks the upstream
-(`rafaelvieiras/wren`) untouched to keep future syncs trivial.
+This clone is the `hiperbold/wren` fork, branch `windows-build`. Since
+v0.1.0 (Aug 2026) upstream ships official Windows installers on its GitHub
+releases, so the installed app now comes from there (0.2.0 installed
+2026-09-03) and this fork is a **fallback**: use its GitHub Actions workflow
+(`.github/workflows/windows-build.yml`, NSIS bundle, retry for transient
+bundler timeouts) only if we ever need a patched build. There is no
+Rust/MSVC toolchain on this machine — always build through Actions.
+`master` tracks the upstream (`rafaelvieiras/wren`) untouched to keep
+future syncs trivial; keep `windows-build` fresh by merging
+`origin/master` into it.
 
 The full dictation system this app plugs into (local Whisper server on port
 9736 + LLM revision + settings reference) lives in the private repo
