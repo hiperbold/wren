@@ -10,6 +10,11 @@
 //! We chose the (lightweight) `log` facade over `tracing`: performance telemetry
 //! is measured per port + `Clock` in the core, so we do not need spans — and we
 //! avoid the weight of `tracing-appender`.
+//!
+//! `Settings::log_level` only ever raises the ceiling for `wren::*` targets —
+//! third-party crates (wgpu, naga, gtk, tao, …) are always capped at INFO,
+//! since their DEBUG/TRACE output is chatty enough to flood the synchronous
+//! file writer and measurably stall whichever thread triggers it.
 
 use std::collections::VecDeque;
 use std::fs::{self, File, OpenOptions};
@@ -122,7 +127,11 @@ impl RotatingFile {
         let _ = fs::create_dir_all(dir);
         let path = dir.join("wren.log");
         let (file, written) = Self::open_append(&path);
-        RotatingFile { path, file, written }
+        RotatingFile {
+            path,
+            file,
+            written,
+        }
     }
 
     fn open_append(path: &Path) -> (Option<File>, u64) {
@@ -188,15 +197,32 @@ struct WrenLogger {
 
 impl Log for WrenLogger {
     fn enabled(&self, _metadata: &Metadata) -> bool {
-        // The effective level is controlled by `set_max_level`; here we accept
-        // everything that arrived (DEBUG+).
+        // The effective level is controlled by `set_max_level` (see
+        // `init_logging`/`set_log_level`); the `log` macros already filter
+        // against it before a record reaches here, so we accept everything.
         true
     }
 
     fn log(&self, record: &Record) {
-        let ts_ms = now_ms();
         let level = record.level();
-        let target = record.target().to_string();
+        let target = record.target();
+
+        // Third-party crates (wgpu/naga/gtk/tao/…) can be extremely chatty at
+        // DEBUG/TRACE — confirmed live: setting `log_level=Debug` just to see
+        // our own `wren::*` diagnostics also unleashed wgpu_hal/naga's
+        // per-frame shader/validation tracing through this same synchronous
+        // file write + eprintln, stalling the overlay render thread to
+        // ~99ms/frame (~10fps) and slowing unrelated local stages (capture
+        // stop, VAD) system-wide. `wren`-prefixed targets still respect
+        // whatever level the user picked (`set_max_level`); everything else
+        // is capped at INFO so a user debugging Wren doesn't also have to
+        // wade through (and pay the I/O cost of) its dependencies' internals.
+        if !target.starts_with("wren") && level > Level::Info {
+            return;
+        }
+
+        let ts_ms = now_ms();
+        let target = target.to_string();
         let message = record.args().to_string();
 
         // stderr — the dev server keeps seeing the logs in the terminal.
@@ -222,18 +248,29 @@ impl Log for WrenLogger {
 /// command the UI queries). Call ONCE at boot; on hot-reload the process
 /// persists and the second call would be ignored (`log` only accepts one global
 /// logger).
-pub fn init_logging(dir: PathBuf) -> Arc<LogBuffer> {
+///
+/// `level` is the initial minimum severity captured (file + ring buffer +
+/// stderr) — it comes from the user's persisted `Settings::log_level`, so a
+/// production install doesn't accumulate DEBUG/TRACE noise by default. Change
+/// it later at runtime with `set_log_level`.
+pub fn init_logging(dir: PathBuf, level: LevelFilter) -> Arc<LogBuffer> {
     let buffer = Arc::new(LogBuffer::new(BUFFER_CAP));
     let logger = WrenLogger {
         buffer: buffer.clone(),
         file: Mutex::new(RotatingFile::open(&dir)),
     };
     if log::set_boxed_logger(Box::new(logger)).is_ok() {
-        log::set_max_level(LevelFilter::Debug);
+        log::set_max_level(level);
     } else {
         eprintln!("[wren] logger already initialized; ignoring re-initialization");
     }
     buffer
+}
+
+/// Changes the captured severity at runtime (e.g. right after `save_settings`),
+/// with no restart needed — `log::set_max_level` is a global atomic.
+pub fn set_log_level(level: LevelFilter) {
+    log::set_max_level(level);
 }
 
 #[cfg(test)]
@@ -297,7 +334,10 @@ mod tests {
         }
         rf.flush();
         assert!(dir.join("wren.log").exists());
-        assert!(dir.join("wren.log.1").exists(), "should have rotated at least once");
+        assert!(
+            dir.join("wren.log.1").exists(),
+            "should have rotated at least once"
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 }

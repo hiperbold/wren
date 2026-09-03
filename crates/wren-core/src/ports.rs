@@ -3,8 +3,7 @@
 //! (the app runs the use case on its own thread).
 
 use crate::domain::{
-    AudioClip, HistoryEntry, SessionMetrics, Settings, Transcript, TranscriptionOptions,
-    VadOutcome,
+    AudioClip, HistoryEntry, SessionMetrics, Settings, Transcript, TranscriptionOptions, VadOutcome,
 };
 use thiserror::Error;
 

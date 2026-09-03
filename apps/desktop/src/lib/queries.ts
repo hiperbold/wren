@@ -28,6 +28,7 @@ export const qk = {
     ["logs", level, query] as const,
   logPath: ["log-path"] as const,
   metrics: ["metrics"] as const,
+  hardwareInfo: ["hardware-info"] as const,
 };
 
 /** Initial settings value (to seed the store). See `useHydrateSettings`. */
@@ -102,6 +103,16 @@ export function useLogPath() {
 
 export function useMetrics() {
   return useQuery({ queryKey: qk.metrics, queryFn: () => tauri.getMetrics(50) });
+}
+
+/** Coarse machine-capability hint, used by the onboarding wizard's local-model
+ * step to decide whether to show a "may be slow on this machine" note. */
+export function useHardwareInfo() {
+  return useQuery({
+    queryKey: qk.hardwareInfo,
+    queryFn: tauri.hardwareInfo,
+    staleTime: Infinity,
+  });
 }
 
 /* --------------------------------- mutations ------------------------------ */

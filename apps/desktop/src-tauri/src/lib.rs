@@ -20,15 +20,16 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 use wren_adapters::{
     init_logging, list_input_devices as adapter_list_input_devices,
-    list_models as adapter_list_models, storage::default_data_dir, ClipboardPasteSink,
-    CpalAudioSource, EarshotVad, JsonSettingsStore, JsonlHistoryStore, JsonlTelemetryStore,
-    LogBuffer, LogRecord, RemoteApiTranscriber, SystemClock, ToneFeedback, WavRecordingStore,
+    list_models as adapter_list_models, set_log_level, storage::default_data_dir,
+    ClipboardPasteSink, CpalAudioSource, EarshotVad, JsonSettingsStore, JsonlHistoryStore,
+    JsonlTelemetryStore, LogBuffer, LogRecord, RemoteApiTranscriber, SystemClock, ToneFeedback,
+    WavRecordingStore,
 };
 use wren_core::{
     egress_is_external, factory_presets, ActivationMode, CompositeFeedback, DictationService,
-    EntryStatus, Feedback as FeedbackPort, HistoryEntry, HistoryStore, PortError, ProviderConfig,
-    ProviderKind, SessionMetrics, SessionState, Settings, SettingsStore, ToggleOutcome,
-    TranscriptionOptions,
+    EntryStatus, Feedback as FeedbackPort, HistoryEntry, HistoryStore, LogLevel, PortError,
+    ProviderConfig, ProviderKind, SessionMetrics, SessionState, Settings, SettingsStore,
+    ToggleOutcome, TranscriptionOptions,
 };
 
 use feedback::TauriFeedback;
@@ -63,6 +64,15 @@ pub struct AppState {
     /// behind. This lock keeps register/unregister ordering consistent with
     /// the actual state transition.
     shortcut_lock: Mutex<()>,
+}
+
+impl AppState {
+    /// Exposed to `overlay_native` so the native overlay's cold-start GPU
+    /// backend probe can read/persist `Settings::gpu_backend_learning`
+    /// without threading a new parameter through `NativeOverlay::open`.
+    pub(crate) fn settings_store(&self) -> &Arc<JsonSettingsStore> {
+        &self.settings_store
+    }
 }
 
 fn build_service(
@@ -152,6 +162,19 @@ fn build_embedded_transcriber(
 /// Released was synthetic and is ignored (see `register_shortcut`).
 const PTT_AUTO_REPEAT_GRACE: Duration = Duration::from_millis(80);
 
+/// Acquires `AppState::shortcut_lock`, recovering from poison instead of
+/// panicking. A `std::sync::Mutex` poisons if the thread holding it panics
+/// while the guard is live — and this lock's critical sections call into
+/// `DictationService::toggle`/`cancel` and the shortcut register/unregister
+/// pair, any of which panicking would otherwise wedge the lock (and thus the
+/// shortcut) permanently for every subsequent press, with the process itself
+/// still alive and no crash to point at. The `()` payload carries no
+/// invariant that a panic mid-section could leave inconsistent, so recovering
+/// is safe: the point of this lock is ordering, not protecting data.
+fn lock_shortcut(lock: &Mutex<()>) -> std::sync::MutexGuard<'_, ()> {
+    lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
 /// Registers the main shortcut according to the activation mode. Calls
 /// `unregister_all()` first — which also clears any leftover cancel shortcut (in
 /// practice this only runs outside a session: setup and save_settings).
@@ -163,22 +186,33 @@ fn register_shortcut(app: &AppHandle, settings: &Settings) -> Result<(), String>
     match settings.activation_mode {
         ActivationMode::Toggle => {
             gs.on_shortcut(shortcut, |app, _shortcut, event| {
-                // DIAGNOSTIC (intermittent "won't stop" bug): logs EVERY raw
-                // shortcut event, with the session state. Distinguishes the two
-                // hypotheses: a burst of Pressed/Released from a single press =
-                // auto-repeat multi-toggle; Pressed with session=Transcribing =
-                // Busy; no log on press = event swallowed in global-hotkey
-                // (`pressed` flag stuck). Remove after diagnosing.
                 let st = event.state();
-                let session = {
-                    let state: State<AppState> = app.state();
-                    let service = state.service.read().unwrap().clone();
-                    service.state()
-                };
-                log::debug!(target: "wren::shortcut", "main shortcut: {st:?} (session={session:?})");
-                if st == ShortcutState::Pressed {
-                    trigger_toggle(app.clone());
-                }
+                let app = app.clone();
+                // Reading `service.state()` (and everything downstream of a
+                // Pressed event) must never run ON the global-hotkey
+                // dispatch thread: that same thread also serves
+                // register/unregister for every shortcut, so a hang here
+                // (e.g. a core lock wedged behind a stuck audio teardown)
+                // would silently kill shortcut detection AND re-registration
+                // together, surviving even a shortcut change in Settings —
+                // only an app restart would bring it back.
+                std::thread::spawn(move || {
+                    // DIAGNOSTIC (intermittent "won't stop" bug): logs EVERY raw
+                    // shortcut event, with the session state. Distinguishes the two
+                    // hypotheses: a burst of Pressed/Released from a single press =
+                    // auto-repeat multi-toggle; Pressed with session=Transcribing =
+                    // Busy; no log on press = event swallowed in global-hotkey
+                    // (`pressed` flag stuck). Remove after diagnosing.
+                    let session = {
+                        let state: State<AppState> = app.state();
+                        let service = state.service.read().unwrap().clone();
+                        service.state()
+                    };
+                    log::debug!(target: "wren::shortcut", "main shortcut: {st:?} (session={session:?})");
+                    if st == ShortcutState::Pressed {
+                        trigger_toggle(app);
+                    }
+                });
             })
             .map_err(|e| format!("invalid shortcut '{shortcut}': {e}"))?;
         }
@@ -263,7 +297,7 @@ fn register_cancel_shortcut(app: &AppHandle) {
                 // racing against a near-simultaneous main-shortcut toggle
                 // must not interleave its state mutation + unregister
                 // with the other thread's register/unregister.
-                let _shortcut_guard = state.shortcut_lock.lock().unwrap();
+                let _shortcut_guard = lock_shortcut(&state.shortcut_lock);
                 let service = state.service.read().unwrap().clone();
                 service.cancel();
                 unregister_cancel_shortcut(&app);
@@ -354,7 +388,7 @@ fn trigger_toggle_if(app: AppHandle, only_if: Option<SessionState>) {
         // read-state → toggle → register/unregister sequence: that is exactly
         // the section whose non-atomicity can otherwise leave the cancel
         // shortcut registration out of sync with the real session state.
-        let _shortcut_guard = state.shortcut_lock.lock().unwrap();
+        let _shortcut_guard = lock_shortcut(&state.shortcut_lock);
         let service = state.service.read().unwrap().clone();
         if let Some(expected) = only_if {
             if service.state() != expected {
@@ -418,6 +452,18 @@ fn copy_last_transcription(app: AppHandle) {
     });
 }
 
+/// Maps the domain's `LogLevel` to the `log` crate's filter (composition-layer
+/// concern — `wren-core` stays free of the `log` dependency).
+fn log_level_filter(level: LogLevel) -> log::LevelFilter {
+    match level {
+        LogLevel::Error => log::LevelFilter::Error,
+        LogLevel::Warn => log::LevelFilter::Warn,
+        LogLevel::Info => log::LevelFilter::Info,
+        LogLevel::Debug => log::LevelFilter::Debug,
+        LogLevel::Trace => log::LevelFilter::Trace,
+    }
+}
+
 #[tauri::command]
 fn get_settings(state: State<AppState>) -> Result<Settings, String> {
     state.settings_store.load().map_err(|e| e.to_string())
@@ -444,6 +490,10 @@ fn save_settings(
         .settings_store
         .save(&settings)
         .map_err(|e| e.to_string())?;
+
+    // Takes effect immediately, no restart needed (log::set_max_level is a
+    // global atomic) — so raising the level to debug a live issue works right away.
+    set_log_level(log_level_filter(settings.log_level));
 
     // Rebuild the service with the new provider and re-register the shortcut —
     // switching provider is config, not reinstallation (doc 01).
@@ -616,6 +666,26 @@ struct ModelInfoDto {
     size_bytes: u64,
 }
 
+/// Coarse machine-capability hint for the onboarding wizard's local-model
+/// step. Deliberately minimal (CPU core count only, via `std` — no new
+/// dependency): a real GPU/CUDA/CoreML capability check is a separate,
+/// dedicated spike, not something to fake here.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HardwareInfoDto {
+    cpu_cores: usize,
+}
+
+/// Reports a coarse hardware hint (CPU core count) for the onboarding
+/// wizard's local-model recommendation. See `HardwareInfoDto`.
+#[tauri::command]
+fn hardware_info() -> HardwareInfoDto {
+    let cpu_cores = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+    HardwareInfoDto { cpu_cores }
+}
+
 /// Event emitted on `embedded://download-progress` during the download.
 #[derive(Clone, serde::Serialize)]
 struct DownloadProgressEvent {
@@ -740,22 +810,28 @@ pub fn run() {
             embedded_catalog,
             embedded_local_models,
             embedded_download_model,
-            embedded_delete_model
+            embedded_delete_model,
+            hardware_info
         ])
         .setup(|app| {
             let handle = app.handle().clone();
 
-            // Central logging FIRST — from here on every `log::` is captured
+            // Settings load FIRST so the logger can start at the user's
+            // persisted `log_level` (default `Info`) instead of always
+            // capturing DEBUG — a production install shouldn't accumulate
+            // verbose noise on disk unless the user opts in.
+            let settings_store = Arc::new(JsonSettingsStore::at_default_location());
+            let settings = settings_store.load().unwrap_or_default();
+
+            // Central logging — from here on every `log::` is captured
             // (stderr + rotating file + ring buffer). 100% local diagnostics.
             let log_dir = default_data_dir().join("logs");
-            let logs = init_logging(log_dir.clone());
+            let logs = init_logging(log_dir.clone(), log_level_filter(settings.log_level));
             log::info!(target: "wren", "Wren starting");
 
-            let settings_store = Arc::new(JsonSettingsStore::at_default_location());
             let history = Arc::new(JsonlHistoryStore::at_default_location());
             let recordings = Arc::new(WavRecordingStore::at_default_location());
             let telemetry = Arc::new(JsonlTelemetryStore::at_default_location());
-            let settings = settings_store.load().unwrap_or_default();
 
             let service = build_service(
                 &handle,

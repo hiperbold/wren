@@ -1,0 +1,63 @@
+{
+  "skip": "Pular — configuro depois",
+  "back": "Voltar",
+  "next": "Continuar",
+  "finish": "Concluir",
+  "stepOf": "Passo {{current}} de {{total}}",
+
+  "welcome.title": "Bem-vindo ao Wren",
+  "welcome.description": "O Wren transforma sua voz em texto em qualquer lugar que você possa digitar. Aperte um atalho, fale, e a transcrição aparece onde estiver o cursor. Vamos configurar o essencial — leva menos de um minuto.",
+  "welcome.cta": "Começar",
+
+  "engine.title": "Onde a transcrição deve acontecer?",
+  "engine.description": "Esta é a escolha mais importante: ela decide se a sua voz sai deste computador ou não.",
+  "engine.local.title": "Neste computador (local)",
+  "engine.local.description": "Privado por padrão — o áudio nunca sai da sua máquina. Roda um modelo de fala no seu próprio hardware; exige um download único e depende da potência do seu computador.",
+  "engine.remote.title": "Um serviço remoto (ex: Groq)",
+  "engine.remote.description": "Mais rápido e preciso em computadores mais fracos, mas o áudio é enviado para os servidores desse serviço. Exige uma conta gratuita e uma chave de API.",
+  "engine.technical": "Detalhes técnicos",
+  "engine.technicalNote": "Os dois caminhos implementam o mesmo contrato de Transcriber, então dá pra trocar de provider depois em Configurações → Provider sem perder o resto do que você configurar aqui.",
+
+  "local.title": "Escolha um modelo local",
+  "local.description": "Modelos maiores transcrevem com mais precisão, mas exigem mais poder de processamento e espaço em disco.",
+  "local.recommended": "Recomendado",
+  "local.hardwareNote.ok": "Seu computador parece capaz de rodar isso com folga.",
+  "local.hardwareNote.limited": "Seu computador tem apenas {{cores}} núcleo(s) de CPU. A transcrição local ainda vai funcionar, mas textos longos podem ficar lentos — se isso acontecer, tente um modelo menor ou troque para um provider remoto depois em Configurações.",
+  "local.download": "Baixar",
+  "local.downloading": "Baixando…",
+  "local.activate": "Usar este modelo",
+  "local.active": "Selecionado",
+  "local.retry": "Tentar de novo",
+
+  "remote.title": "Conecte um provider remoto",
+  "remote.description": "Já deixamos o Groq pré-preenchido (rápido, tem plano gratuito). Você pode trocar isso depois em Configurações → Provider.",
+  "remote.stepsTitle": "Como conseguir uma chave",
+  "remote.step1": "Crie uma conta gratuita em console.groq.com",
+  "remote.step2": "Abra \"API Keys\" e clique em \"Create API Key\"",
+  "remote.step3": "Copie a chave e cole abaixo",
+  "remote.openConsole": "Abrir o guia passo a passo",
+  "remote.apiKey.label": "Chave de API",
+  "remote.apiKey.placeholder": "Cole sua chave aqui",
+  "remote.apiKey.hint": "Fica guardada só neste computador, e só é enviada para o provider que você escolheu.",
+  "remote.apiKey.show": "Mostrar chave",
+  "remote.apiKey.hide": "Ocultar chave",
+
+  "shortcut.title": "Defina seu atalho de ditado",
+  "shortcut.description": "Aperte essa combinação em qualquer lugar pra começar a ditar; aperte de novo (ou solte, no modo push-to-talk) pra parar. O texto é entregue onde estiver o cursor — sem precisar voltar pro Wren.",
+
+  "test.title": "Faça um teste",
+  "test.description": "Clique no campo abaixo, depois use seu atalho e fale esta frase em voz alta:",
+  "test.placeholder": "O que você ditar vai aparecer aqui…",
+  "test.success": "Funcionou! O Wren está pronto pra usar.",
+  "test.phrases": [
+    "Testando o Wren pela primeira vez hoje.",
+    "A raposa marrom pula sobre o cachorro preguiçoso.",
+    "Esta é a minha nova configuração de ditado por voz.",
+    "Café primeiro, depois eu respondo esses e-mails.",
+    "Lembrar de enviar o relatório até sexta-feira."
+  ],
+
+  "done.title": "Tudo pronto",
+  "done.description": "Você pode mudar qualquer coisa disso depois em Configurações. Bom ditado!",
+  "done.cta": "Começar a usar o Wren"
+}

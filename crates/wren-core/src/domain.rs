@@ -280,6 +280,21 @@ pub enum PasteMethod {
     Wtype,
 }
 
+/// Verbosity of the local diagnostics logger (file + ring buffer + stderr).
+/// Ships defaulting to `Info` so a production install doesn't accumulate
+/// DEBUG/TRACE noise on disk; the user can raise it from Settings › System
+/// when troubleshooting (doc: Diagnostics tab).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LogLevel {
+    Error,
+    Warn,
+    #[default]
+    Info,
+    Debug,
+    Trace,
+}
+
 /// The user's persisted preferences.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -329,6 +344,72 @@ pub struct Settings {
     /// authority).
     #[serde(default)]
     pub launch_at_login: bool,
+    /// Minimum severity captured by the local logger. Absent in old
+    /// settings.json ⇒ `Info`.
+    #[serde(default)]
+    pub log_level: LogLevel,
+    /// Has the first-run onboarding wizard been completed (or skipped)?
+    /// Absent in old settings.json ⇒ `true` — an existing install already
+    /// configured everything the wizard would ask, so it must not resurface
+    /// for upgrading users. Only `Settings::default()` (no settings.json at
+    /// all yet, i.e. a genuinely new install) sets this to `false`.
+    #[serde(default = "default_onboarding_completed")]
+    pub onboarding_completed: bool,
+    /// Learned whether the native overlay's GL backend probe is worth trying
+    /// on this machine at cold start (see `GpuBackendLearning`). Absent in old
+    /// settings.json ⇒ starts unlearned (probes GL like before).
+    #[serde(default)]
+    pub gpu_backend_learning: GpuBackendLearning,
+}
+
+/// Learned, per-install, whether the native overlay's cold-start GL backend
+/// probe (`overlay_native.rs`'s `init_gpu`) is worth attempting. On some
+/// Linux/X11 setups (confirmed live: NVIDIA proprietary driver), the PRIMARY
+/// backend (Vulkan) only ever exposes an opaque compositing alpha, so the
+/// code also tries GL — but GL's `request_adapter` can fail outright there,
+/// wasting ~300ms every session for nothing. Rather than hardcoding that as a
+/// platform special-case (risking breaking setups where GL *is* needed, e.g.
+/// it's the one that provides real alpha), this samples a handful of real
+/// cold starts and only skips the GL attempt once it's proven wasteful on
+/// this specific machine. Self-heals: if skipping GL later causes the overlay
+/// to fail to open at all (e.g. a GPU/driver change), the caller resets this
+/// and retries with GL included again.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct GpuBackendLearning {
+    #[serde(default)]
+    pub sessions_observed: u32,
+    #[serde(default)]
+    pub gl_failures: u32,
+    #[serde(default)]
+    pub skip_gl_probe: bool,
+}
+
+/// How many cold starts to sample before deciding.
+const GPU_LEARNING_SAMPLE_TARGET: u32 = 6;
+/// Out of `GPU_LEARNING_SAMPLE_TARGET` samples, how many wasted GL attempts
+/// it takes to conclude GL isn't worth it here — tolerates one outlier sample
+/// either way instead of requiring a unanimous run.
+const GPU_LEARNING_FAILURE_THRESHOLD: u32 = 5;
+
+impl GpuBackendLearning {
+    /// Records whether this session's GL attempt was wasted (it errored, or
+    /// it succeeded but didn't end up being the chosen alpha-providing
+    /// candidate). Once converged (`skip_gl_probe == true`) this is a no-op —
+    /// there's nothing left to sample, since the next session won't attempt
+    /// GL at all.
+    pub fn record_sample(mut self, gl_wasted: bool) -> Self {
+        if self.skip_gl_probe {
+            return self;
+        }
+        self.sessions_observed += 1;
+        if gl_wasted {
+            self.gl_failures += 1;
+        }
+        if self.sessions_observed >= GPU_LEARNING_SAMPLE_TARGET {
+            self.skip_gl_probe = self.gl_failures >= GPU_LEARNING_FAILURE_THRESHOLD;
+        }
+        self
+    }
 }
 
 fn default_compress_pauses_over_ms() -> Option<u64> {
@@ -341,6 +422,10 @@ fn default_play_sounds() -> bool {
 
 fn default_cancel_shortcut() -> String {
     "Escape".into()
+}
+
+fn default_onboarding_completed() -> bool {
+    true
 }
 
 /// Catalog of presets the UI offers on "add provider". The single source of
@@ -418,7 +503,10 @@ fn extract_host(url: &str) -> Option<String> {
         return None;
     }
     // IPv6 comes in brackets: "[::1]:8555" ⇒ keeps "[::1]".
-    if let Some(end) = host_port.strip_prefix('[').and_then(|_| host_port.find(']')) {
+    if let Some(end) = host_port
+        .strip_prefix('[')
+        .and_then(|_| host_port.find(']'))
+    {
         return Some(host_port[..=end].to_string());
     }
     // Common case: cut the port at ":".
@@ -439,7 +527,9 @@ fn is_local_host(host: &str) -> bool {
 
 impl Settings {
     pub fn active_provider(&self) -> Option<&ProviderConfig> {
-        self.providers.iter().find(|p| p.id == self.active_provider_id)
+        self.providers
+            .iter()
+            .find(|p| p.id == self.active_provider_id)
     }
 }
 
@@ -464,6 +554,9 @@ impl Default for Settings {
             paste_method: PasteMethod::default(),
             restore_clipboard: false,
             launch_at_login: false,
+            log_level: LogLevel::default(),
+            onboarding_completed: false,
+            gpu_backend_learning: GpuBackendLearning::default(),
         }
     }
 }
@@ -498,6 +591,27 @@ mod tests {
         }"#;
         let settings: Settings = serde_json::from_str(raw).unwrap();
         assert_eq!(settings.compress_pauses_over_ms, None);
+    }
+
+    /// Backward compatibility: settings.json predating onboarding (without
+    /// `onboarding_completed`) loads as already completed — an existing
+    /// install must not be sent back through the first-run wizard.
+    #[test]
+    fn settings_missing_onboarding_completed_loads_true() {
+        let raw = r#"{
+            "active_provider_id": "groq",
+            "providers": [],
+            "shortcut": "ctrl+shift+space",
+            "language": "pt"
+        }"#;
+        let settings: Settings = serde_json::from_str(raw).unwrap();
+        assert!(settings.onboarding_completed);
+    }
+
+    /// A genuinely new install (no settings.json at all) gets the wizard.
+    #[test]
+    fn default_settings_have_onboarding_incomplete() {
+        assert!(!Settings::default().onboarding_completed);
     }
 
     /// Backward compatibility: settings.json predating push-to-talk (without
@@ -639,6 +753,58 @@ mod tests {
         assert_eq!(entry.recorded_duration_ms, None);
         assert_eq!(entry.audio_duration_ms, 1000);
         assert_eq!(entry.status, EntryStatus::Done);
+    }
+
+    #[test]
+    fn gpu_backend_learning_converges_to_skip_when_gl_wastes_every_sample() {
+        let mut learning = GpuBackendLearning::default();
+        for _ in 0..GPU_LEARNING_SAMPLE_TARGET {
+            learning = learning.record_sample(true);
+        }
+        assert_eq!(learning.sessions_observed, GPU_LEARNING_SAMPLE_TARGET);
+        assert_eq!(learning.gl_failures, GPU_LEARNING_SAMPLE_TARGET);
+        assert!(learning.skip_gl_probe);
+    }
+
+    #[test]
+    fn gpu_backend_learning_tolerates_a_single_outlier_sample() {
+        let mut learning = GpuBackendLearning::default();
+        learning = learning.record_sample(false); // one non-wasted sample
+        for _ in 1..GPU_LEARNING_SAMPLE_TARGET {
+            learning = learning.record_sample(true);
+        }
+        assert!(learning.skip_gl_probe);
+    }
+
+    #[test]
+    fn gpu_backend_learning_keeps_gl_when_it_is_actually_useful() {
+        let mut learning = GpuBackendLearning::default();
+        for _ in 0..GPU_LEARNING_SAMPLE_TARGET {
+            learning = learning.record_sample(false); // GL kept winning
+        }
+        assert!(!learning.skip_gl_probe);
+    }
+
+    #[test]
+    fn gpu_backend_learning_stops_sampling_once_converged() {
+        let mut learning = GpuBackendLearning::default();
+        for _ in 0..GPU_LEARNING_SAMPLE_TARGET {
+            learning = learning.record_sample(true);
+        }
+        assert!(learning.skip_gl_probe);
+        let converged = learning;
+        // Further samples are no-ops — there's nothing left to observe once
+        // future sessions stop attempting GL at all.
+        learning = learning.record_sample(false);
+        assert_eq!(learning, converged);
+    }
+
+    #[test]
+    fn gpu_backend_learning_default_is_unlearned() {
+        let learning = GpuBackendLearning::default();
+        assert_eq!(learning.sessions_observed, 0);
+        assert_eq!(learning.gl_failures, 0);
+        assert!(!learning.skip_gl_probe);
     }
 }
 

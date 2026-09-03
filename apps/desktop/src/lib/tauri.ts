@@ -11,6 +11,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 export type ActivationMode = "toggle" | "push_to_talk";
 export type PasteMethod = "paste" | "ctrl_shift_v" | "type" | "wtype";
+export type LogLevel = "error" | "warn" | "info" | "debug" | "trace";
 
 export interface ProviderConfig {
   id: string;
@@ -38,6 +39,24 @@ export interface Settings {
   paste_method: PasteMethod;
   restore_clipboard: boolean;
   launch_at_login: boolean;
+  /** Minimum severity captured by the local logger. Default: "info". */
+  log_level: LogLevel;
+  /** Has the first-run onboarding wizard been completed (or skipped)? */
+  onboarding_completed: boolean;
+  /** Learned whether the overlay's cold-start GL backend probe is worth
+   * trying on this machine (see `GpuBackendLearning` in wren-core). */
+  gpu_backend_learning: GpuBackendLearning;
+}
+
+export interface GpuBackendLearning {
+  sessions_observed: number;
+  gl_failures: number;
+  skip_gl_probe: boolean;
+}
+
+/** Coarse machine-capability hint (mirrors `HardwareInfoDto`, camelCase). */
+export interface HardwareInfo {
+  cpuCores: number;
 }
 
 /** A log record (mirrors `LogRecord`). */
@@ -141,6 +160,7 @@ export const tauri = {
     invoke<void>("embedded_download_model", { id }),
   embeddedDeleteModel: (id: string) =>
     invoke<void>("embedded_delete_model", { id }),
+  hardwareInfo: () => invoke<HardwareInfo>("hardware_info"),
 };
 
 /** Subscribes to embedded download progress. Resolves to the unlisten function;

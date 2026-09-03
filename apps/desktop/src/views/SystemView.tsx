@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useCheckUpdates } from "@/lib/queries";
 import { useSettingsStore } from "@/lib/store";
-import type { PasteMethod } from "@/lib/tauri";
+import type { LogLevel, PasteMethod } from "@/lib/tauri";
 
 /**
  * Text delivery methods (mirrors the domain's `PasteMethod`). The `value` is the
@@ -58,6 +58,21 @@ const PASTE_METHODS: {
   },
 ];
 
+/**
+ * Logger verbosity (mirrors the domain's `LogLevel`). `value` is the backend
+ * contract; `labelKey` points at the `system` i18n namespace.
+ */
+const LOG_LEVELS: { value: LogLevel; labelKey: string }[] = [
+  { value: "error", labelKey: "logging.level.error" },
+  { value: "warn", labelKey: "logging.level.warn" },
+  { value: "info", labelKey: "logging.level.info" },
+  { value: "debug", labelKey: "logging.level.debug" },
+  { value: "trace", labelKey: "logging.level.trace" },
+];
+
+/** Mirrors `GPU_LEARNING_SAMPLE_TARGET` in wren-core's `domain.rs`. */
+const GPU_LEARNING_SAMPLE_TARGET = 6;
+
 /** Subtle (i) with a tooltip hint — replaces the old tiny ⓘ marks. */
 function InfoHint({ label }: { label: string }) {
   const { t } = useTranslation("system");
@@ -86,6 +101,7 @@ export default function SystemView() {
   const { t } = useTranslation("system");
   const settings = useSettingsStore((s) => s.settings);
   const setField = useSettingsStore((s) => s.setField);
+  const saveNow = useSettingsStore((s) => s.saveNow);
   const checkUpdates = useCheckUpdates();
 
   if (!settings) return null;
@@ -174,6 +190,31 @@ export default function SystemView() {
 
       <Card>
         <CardHeader>
+          <CardTitle>{t("logging.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Field label={t("logging.level.label")} hint={t("logging.level.hint")}>
+            <Select
+              value={settings.log_level}
+              onValueChange={(v) => setField("log_level", v as LogLevel)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LOG_LEVELS.map((lv) => (
+                  <SelectItem key={lv.value} value={lv.value}>
+                    {t(lv.labelKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>{t("updates.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -206,6 +247,67 @@ export default function SystemView() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t("updates.description")}
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("advanced.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Field
+            label={t("advanced.gpuProbe.title")}
+            hint={t("advanced.gpuProbe.hint")}
+          >
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setField("gpu_backend_learning", {
+                    sessions_observed: 0,
+                    gl_failures: 0,
+                    skip_gl_probe: false,
+                  });
+                  saveNow();
+                }}
+              >
+                {t("advanced.gpuProbe.reset")}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {settings.gpu_backend_learning.skip_gl_probe
+                  ? t("advanced.gpuProbe.optimized")
+                  : settings.gpu_backend_learning.sessions_observed >=
+                      GPU_LEARNING_SAMPLE_TARGET
+                    ? t("advanced.gpuProbe.notNeeded")
+                    : t("advanced.gpuProbe.learning", {
+                        count: settings.gpu_backend_learning.sessions_observed,
+                        target: GPU_LEARNING_SAMPLE_TARGET,
+                      })}
+              </span>
+            </div>
+          </Field>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("onboarding.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {t("onboarding.description")}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setField("onboarding_completed", false);
+              saveNow();
+            }}
+          >
+            {t("onboarding.button")}
+          </Button>
         </CardContent>
       </Card>
     </div>
