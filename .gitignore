@@ -17,3 +17,6 @@ apps/desktop/src-tauri/gen/
 
 # Local MCP — contains an API key (ElevenLabs). NEVER commit.
 .mcp.json
+
+# Local: installers downloaded from the CI build (rebuildable via Actions)
+release-windows/
