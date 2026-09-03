@@ -92,3 +92,18 @@ Behavioral hot spots — change only with explicit intent, never as a drive-by:
   the surrounding file's style.
 - Before opening a PR, run the build/test/lint commands above and make sure the
   UI still switches cleanly between the `en` and `pt-BR` locales.
+
+## Windows fork (hiperbold)
+
+This clone is the `hiperbold/wren` fork, branch `windows-build`, kept only to
+build the Windows installer via GitHub Actions
+(`.github/workflows/windows-build.yml`, NSIS bundle, with a retry for the
+bundler's transient download timeouts). There is no Rust/MSVC toolchain on
+this machine — always build through Actions. `main` tracks the upstream
+(`rafaelvieiras/wren`) untouched to keep future syncs trivial.
+
+The full dictation system this app plugs into (local Whisper server on port
+9736 + LLM revision + settings reference) lives in the private repo
+`hiperbold/wren-whisper-hiperbold` (local folder `F:\Whisper`) — read its
+AGENTS.md first. Installers downloaded from CI are kept in
+`release-windows/`, outside git.
